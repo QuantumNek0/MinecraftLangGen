@@ -1,7 +1,7 @@
 # IMPORTANT
 # Must have structure: 
 #   - namespace: <studioName>_<projectName>
-#   - directory example: .../<projectNameCamel>-BP/items/<studioName>/<projectName>/...
+#   - directory example: ...<projectNameCamel>/<projectNameCamel>-BP/items/<studioName>/<projectName>/...
 #   - file name, identifier and actual name are similar: awesome_sword.item.json --> <namespace>:awesome_sword --> Awesome Sword
 #
 # Created by QuantumNek0
@@ -61,7 +61,7 @@ def writeNames(lang_file: TextIO, files: list[str], namespace: str, mode: str):
 
 
 def getAllFiles(directory: str) -> tuple[list[str], list[str], list[str]]:
-    
+
     item_files = getFiles(directory + "/items", ".json")
     entity_files = getFiles(directory + "/entities", ".json")
     block_files = getFiles(directory + "/blocks", ".json")
@@ -78,24 +78,28 @@ def getFiles(directory: str, extension: str) -> list[str]:
 
     return files
 
-# AI slop here, can't be bothered to format strings lol
-def formatFileName(filename: str):
-    # Remove extension(s)
-    name = os.path.splitext(filename)[0]  # removes last extension
-    name = name.replace('.', '_')  # replace any remaining dots with underscores
+def formatFileName(filename: str) -> tuple[str, str]:
+    # 1. manipulate the input argument in a variable named 'natural_name'
+    natural_name = filename
+    
+    # 2. remove the file extension (probably .json)
+    natural_name = os.path.splitext(natural_name)[0]
+    
+    # 3. remove the second extension if any (either .item or .block)
+    natural_name = os.path.splitext(natural_name)[0]
+    
+    # 3.1. save the string at its current state in a variable named 'identifier'
+    identifier = natural_name
+    
+    # 4. replace underscores with spaces
+    natural_name = natural_name.replace('_', ' ')
+    
+    # 5. capitalize the start of every word
+    natural_name = natural_name.title()
+    
+    # 6. return both 'natural_name' and 'identifier'
+    return identifier, natural_name
 
-    parts = name.split('_')
-    if parts[0].lower() == "tnt":
-        # TNT at start: move to end for formatted, keep in name
-        formatted = " ".join(word.capitalize() for word in parts[1:]) + " TNT"
-    else:
-        # TNT elsewhere: move to end for formatted, keep in name
-        if "tnt" in parts:
-            tnt_index = parts.index("tnt")
-            formatted = " ".join(word.capitalize() for i, word in enumerate(parts) if i != tnt_index) + " TNT"
-        else:
-            formatted = " ".join(word.capitalize() for word in parts)
-    return name, formatted
 
 
 if __name__ == "__main__":
