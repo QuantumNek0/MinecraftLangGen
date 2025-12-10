@@ -27,38 +27,38 @@ def main():
     item_files, block_files, entity_files = getAllFiles(directory_path + f"/{project_name}-BP")
     namespace = input("namespace: ")
 
-    with open(lang_path, 'r+', encoding='utf-8') as f:
-        contents = f.read()
-        
-        if contents[-1] != '\n': f.write('\n')
-        writeNames(f, item_files, namespace, "item")
-        writeNames(f, block_files, namespace, "block")
-        writeNames(f, entity_files, namespace, "entity")
+    with open(lang_path, 'r+', encoding='utf-8') as f:        
+        writeKeys(f, item_files, namespace, "item")
+        writeKeys(f, block_files, namespace, "block")
+        writeKeys(f, entity_files, namespace, "entity")
 
 
-
-def writeNames(lang_file: TextIO, files: list[str], namespace: str, mode: str):
+def writeKeys(lang_file: TextIO, files: list[str], namespace: str, mode: str):
     if not files: return
+    contents = lang_file.read()
 
-    match mode:
-        case "item":
-            for file in files:
-                identifier, natural_name = formatFileName(file)
-                lang_file.write(f"item.{namespace}:{identifier}=" + natural_name + '\n')
+    if not contents.endswith('\n'):
+        lang_file.write('\n')
+        contents += '\n'
 
-        case "block":
-            for file in files:
-                identifier, natural_name = formatFileName(file)
-                lang_file.write(f"tile.{namespace}:{identifier}.name=" + natural_name + '\n')
+    for file in files:
+        identifier, natural_name = formatFileName(file)
+        
+        match mode:
 
-        case "entity":
-            for file in files:
-                identifier, natural_name = formatFileName(file)
-                lang_file.write(f"entity.{namespace}:{identifier}.name=" + natural_name + '\n')
+            case "item":
+                key = f"item.{namespace}:{identifier}=" + natural_name + '\n'
 
-        case _:
-            return
+            case "block":
+                key = f"tile.{namespace}:{identifier}.name=" + natural_name + '\n'
 
+            case "entity":
+                key = f"entity.{namespace}:{identifier}.name=" + natural_name + '\n'
+
+            case _:
+                raise ValueError("Invalid mode.")
+        
+        if (key not in contents): lang_file.write(key)
 
 def getAllFiles(directory: str) -> tuple[list[str], list[str], list[str]]:
 
@@ -99,7 +99,6 @@ def formatFileName(filename: str) -> tuple[str, str]:
     
     # 6. return both 'natural_name' and 'identifier'
     return identifier, natural_name
-
 
 
 if __name__ == "__main__":
